@@ -6,5 +6,6 @@ https://spring.io/guides/gs/serving-web-content/
 ## 工具
 git
 
-##命令
+## 命令
 mvn -Dmybatis.generator.overwrite=true mybatis-generator:generate
+mvn flyway:migrate
