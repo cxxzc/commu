@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import project.wong.comm.mapper.UserMapper;
 import project.wong.comm.model.User;
+import project.wong.comm.model.UserExample;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -11,18 +14,24 @@ public class UserService {
     private UserMapper userMapper;
 
     public void createOrUpdate(User user) {
-        User dbUser = userMapper.findByAccountId(user.getAccountId());
-        if(dbUser == null){
+        UserExample example = new UserExample();
+        example.createCriteria().andAccountIdEqualTo(user.getAccountId());
+        List<User> users = userMapper.selectByExample(example);
+        if(users.size() == 0){
             //插入
             user.setGmtCreate(System.currentTimeMillis());
             user.setGmtModified(user.getGmtCreate());
             userMapper.insert(user);
         }else {
-            dbUser.setAvatarUrl(user.getAvatarUrl());
-            dbUser.setGmtModified(System.currentTimeMillis());
-            dbUser.setName(user.getName());
-            dbUser.setToken(user.getToken());
-            userMapper.update(dbUser);
+            User dbUser = users.get(0);
+            User updateUser = new User();
+            updateUser.setAvatarUrl(user.getAvatarUrl());
+            updateUser.setGmtModified(System.currentTimeMillis());
+            updateUser.setName(user.getName());
+            updateUser.setToken(user.getToken());
+            UserExample example1 = new UserExample();
+            example1.createCriteria().andIdEqualTo(dbUser.getId());
+            userMapper.updateByExampleSelective(updateUser,example1);
             //更新
         }
     }
